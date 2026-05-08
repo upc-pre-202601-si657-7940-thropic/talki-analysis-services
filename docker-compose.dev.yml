@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: talki-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # Management UI: http://localhost:15672 (guest/guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  transcription-service:
+    build: ./transcription-service
+    container_name: talki-transcription
+    ports:
+      - "8086:8086"
+    environment:
+      SERVER_PORT: 8086
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  filler-detection-service:
+    build: ./filler-detection-service
+    container_name: talki-filler
+    ports:
+      - "8087:8087"
+    environment:
+      SERVER_PORT: 8087
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  scoring-service:
+    build: ./scoring-service
+    container_name: talki-scoring
+    ports:
+      - "8088:8088"
+    environment:
+      SERVER_PORT: 8088
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
