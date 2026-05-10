@@ -1,4 +1,4 @@
-package com.thropic.talki.transcription.domain.event;
+package com.thropic.talki.filler.domain.event;
 
 import java.time.Instant;
 
@@ -12,7 +12,10 @@ public class SessionLiveFinalizedEvent {
     private String userId;
     private String mode;
     private String scenarioId;
-    private String audioUri;
+    private String transcriptGemini;
+    private int wordsPerMinute;
+    private double silenceRatio;
+    private double volumeRmsAvg;
     private int durationSeconds;
     private String academicSegment;
 
@@ -36,8 +39,14 @@ public class SessionLiveFinalizedEvent {
     public void setMode(String mode) { this.mode = mode; }
     public String getScenarioId() { return scenarioId; }
     public void setScenarioId(String scenarioId) { this.scenarioId = scenarioId; }
-    public String getAudioUri() { return audioUri; }
-    public void setAudioUri(String audioUri) { this.audioUri = audioUri; }
+    public String getTranscriptGemini() { return transcriptGemini; }
+    public void setTranscriptGemini(String transcriptGemini) { this.transcriptGemini = transcriptGemini; }
+    public int getWordsPerMinute() { return wordsPerMinute; }
+    public void setWordsPerMinute(int wordsPerMinute) { this.wordsPerMinute = wordsPerMinute; }
+    public double getSilenceRatio() { return silenceRatio; }
+    public void setSilenceRatio(double silenceRatio) { this.silenceRatio = silenceRatio; }
+    public double getVolumeRmsAvg() { return volumeRmsAvg; }
+    public void setVolumeRmsAvg(double volumeRmsAvg) { this.volumeRmsAvg = volumeRmsAvg; }
     public int getDurationSeconds() { return durationSeconds; }
     public void setDurationSeconds(int durationSeconds) { this.durationSeconds = durationSeconds; }
     public String getAcademicSegment() { return academicSegment; }

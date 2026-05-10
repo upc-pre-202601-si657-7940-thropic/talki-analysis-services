@@ -15,8 +15,8 @@ public class RabbitMQConfig {
 
     public static final String EXCHANGE      = "talki.events";
     public static final String DLX           = "talki.dlx";
-    public static final String QUEUE         = "filler.transcription-ready";
-    public static final String ROUTING_KEY   = "transcription.completed";
+    public static final String QUEUE         = "filler.session-finalized";
+    public static final String ROUTING_KEY   = "session.live.finalized";
     public static final String OUT_ROUTING   = "fillers.analyzed";
 
     @Bean
