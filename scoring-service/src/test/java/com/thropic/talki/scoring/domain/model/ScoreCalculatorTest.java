@@ -19,11 +19,15 @@ class ScoreCalculatorTest {
     }
 
     private FillerAnalyzedEvent buildEvent(int wordCount, int durationSeconds, int totalFillers) {
-        return new FillerAnalyzedEvent(
-                "sess-1", "user-1", totalFillers,
-                Map.of("este", totalFillers),
-                wordCount, durationSeconds, "trace-1"
-        );
+        FillerAnalyzedEvent e = new FillerAnalyzedEvent();
+        e.setSessionId("sess-1");
+        e.setUserId("user-1");
+        e.setTotalFillers(totalFillers);
+        e.setFillersByType(Map.of("este", totalFillers));
+        e.setWordCount(wordCount);
+        e.setDurationSeconds(durationSeconds);
+        e.setTraceId("trace-1");
+        return e;
     }
 
     @Test

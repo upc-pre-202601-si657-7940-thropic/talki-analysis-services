@@ -42,11 +42,14 @@ class FillerAnalyzedConsumerTest {
 
     @BeforeEach
     void setUp() {
-        inputEvent = new FillerAnalyzedEvent(
-                "sess-1", "user-1", 5,
-                Map.of("este", 5),
-                300, 120, "trace-1"
-        );
+        inputEvent = new FillerAnalyzedEvent();
+        inputEvent.setSessionId("sess-1");
+        inputEvent.setUserId("user-1");
+        inputEvent.setTotalFillers(5);
+        inputEvent.setFillersByType(Map.of("este", 5));
+        inputEvent.setWordCount(300);
+        inputEvent.setDurationSeconds(120);
+        inputEvent.setTraceId("trace-1");
         VoiceScore scores = new VoiceScore(80, 75, 70, 85, 90);
         calculatedEvent = new ScoringCompletedEvent(
                 "sess-1", "user-1", scores, 5, 0.08, 150, "trace-1"
