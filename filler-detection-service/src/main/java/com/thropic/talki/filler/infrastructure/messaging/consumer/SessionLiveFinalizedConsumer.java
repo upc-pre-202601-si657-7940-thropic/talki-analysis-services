@@ -45,6 +45,9 @@ public class SessionLiveFinalizedConsumer {
                 total,
                 fillersByType,
                 wordCount,
+                event.getWordsPerMinute(),
+                event.getSilenceRatio(),
+                event.getVolumeRmsAvg(),
                 event.getDurationSeconds(),
                 event.getTraceId()
         );

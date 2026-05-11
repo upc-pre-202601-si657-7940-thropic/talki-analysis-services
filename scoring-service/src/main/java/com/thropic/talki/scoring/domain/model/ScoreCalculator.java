@@ -8,12 +8,19 @@ import org.springframework.stereotype.Component;
 public class ScoreCalculator {
 
     public ScoringCompletedEvent calculate(FillerAnalyzedEvent event) {
-        int wpm = computeWpm(event.getWordCount(), event.getDurationSeconds());
-        double silenceRatio = 0.08; // placeholder: análisis acústico fuera del alcance JVM
+        // Las métricas acústicas y el WPM provienen del live-coach-service
+        // (calculados en memoria durante la sesión sobre el audio de Gemini Live)
+        // y se propagan por el bus de eventos. Si no llegaron (eventos legacy o
+        // fallback), recurrimos a una estimación derivada del wordCount.
+        int wpm = event.getWordsPerMinute() > 0
+                ? event.getWordsPerMinute()
+                : estimateWpm(event.getWordCount(), event.getDurationSeconds());
+        double silenceRatio = event.getSilenceRatio();
+        double volumeRmsAvg = event.getVolumeRmsAvg();
 
         int fluency    = fluencyScore(wpm, event.getTotalFillers());
         int clarity    = clarityScore(wpm);
-        int volume     = 70; // análisis acústico del audio (placeholder)
+        int volume     = volumeScore(volumeRmsAvg);
         int vocabulary = vocabularyScore(event.getTotalFillers());
         int confidence = confidenceScore(silenceRatio);
 
@@ -30,7 +37,7 @@ public class ScoreCalculator {
         );
     }
 
-    private int computeWpm(int wordCount, int durationSeconds) {
+    private int estimateWpm(int wordCount, int durationSeconds) {
         if (durationSeconds <= 0) return 0;
         return (wordCount * 60) / durationSeconds;
     }
@@ -45,6 +52,19 @@ public class ScoreCalculator {
         if (wpm >= 100 && wpm <= 150) return 85;
         if (wpm >= 80) return 65;
         return 50;
+    }
+
+    /**
+     * Score de volumen derivado del RMS promedio del audio (rango típico 0.0-1.0
+     * tras normalización). Se considera óptimo entre 0.5 y 0.8: niveles más
+     * bajos sugieren timidez y más altos saturación o griterío.
+     */
+    private int volumeScore(double rmsAvg) {
+        if (rmsAvg <= 0.0) return 0;
+        if (rmsAvg >= 0.5 && rmsAvg <= 0.8) return 90;
+        if (rmsAvg >= 0.3 && rmsAvg < 0.5) return 70;
+        if (rmsAvg > 0.8) return 60;
+        return 40;
     }
 
     private int vocabularyScore(int fillerCount) {

@@ -68,6 +68,11 @@ class SessionLiveFinalizedConsumerTest {
         assertThat(published.getFillersByType()).containsEntry("este", 2);
         assertThat(published.getTraceId()).isEqualTo("trace-1");
         assertThat(published.getDurationSeconds()).isEqualTo(300);
+        // Las métricas acústicas y wpm vienen del upstream y deben propagarse
+        // sin recalcular para preservar la fuente de verdad (live-coach-service).
+        assertThat(published.getWordsPerMinute()).isEqualTo(95);
+        assertThat(published.getSilenceRatio()).isEqualTo(0.15);
+        assertThat(published.getVolumeRmsAvg()).isEqualTo(0.6);
     }
 
     @Test

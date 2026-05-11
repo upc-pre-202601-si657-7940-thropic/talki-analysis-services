@@ -11,6 +11,7 @@ import com.thropic.talki.scoring.infrastructure.persistence.ScoreResultRepositor
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,11 @@ public class FillerAnalyzedConsumer {
         log.info("[scoring-service] Received fillers.analyzed — sessionId={} totalFillers={}",
                 event.getSessionId(), event.getTotalFillers());
 
-        // Idempotencia: si ya existe un ScoreResult para esta sesión, no recalculamos.
+        // Idempotencia at-least-once: chequeo barato antes del cálculo. La
+        // unique constraint sobre session_id en BD actúa como red de seguridad
+        // contra race conditions entre consumers concurrentes o redeliveries
+        // simultáneas — se captura DataIntegrityViolationException y se trata
+        // como duplicado en lugar de devolver el mensaje al DLX.
         if (scoreResultRepository.findBySessionId(event.getSessionId()).isPresent()) {
             log.warn("[scoring-service] Duplicate fillers.analyzed ignored — sessionId={}",
                     event.getSessionId());
@@ -55,7 +60,13 @@ public class FillerAnalyzedConsumer {
                 scoring.getWordsPerMinute(),
                 scoring.getSilenceRatio()
         );
-        scoreResultRepository.save(persisted);
+        try {
+            scoreResultRepository.save(persisted);
+        } catch (DataIntegrityViolationException race) {
+            log.warn("[scoring-service] Race on session_id unique — treating as duplicate, sessionId={}",
+                    event.getSessionId());
+            return;
+        }
 
         log.info("[scoring-service] Score persisted and published — sessionId={} overall={}",
                 event.getSessionId(), scoring.getOverallScore());

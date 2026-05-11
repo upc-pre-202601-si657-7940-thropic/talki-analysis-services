@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -77,6 +78,23 @@ class FillerAnalyzedConsumerTest {
 
         verify(scoreCalculator, never()).calculate(any());
         verify(scoreResultRepository, never()).save(any());
+        verify(publisher, never()).publish(any());
+    }
+
+    @Test
+    void handle_whenRaceConditionOnSave_shouldTreatAsDuplicate() {
+        // El check inicial pasa (otra réplica del consumer pasó por el mismo
+        // gate al mismo tiempo). Cuando llega el save(), la unique constraint
+        // sobre session_id explota: el consumer debe tratarlo como duplicado
+        // y NO devolver el mensaje al DLX.
+        when(scoreResultRepository.findBySessionId("sess-1")).thenReturn(Optional.empty());
+        when(scoreCalculator.calculate(inputEvent)).thenReturn(calculatedEvent);
+        when(scoreResultRepository.save(any(ScoreResult.class)))
+                .thenThrow(new DataIntegrityViolationException("Unique violation on session_id"));
+
+        consumer.handle(inputEvent);
+
+        verify(scoreResultRepository).save(any(ScoreResult.class));
         verify(publisher, never()).publish(any());
     }
 
