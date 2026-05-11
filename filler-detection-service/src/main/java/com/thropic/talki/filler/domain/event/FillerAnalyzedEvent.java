@@ -15,13 +15,18 @@ public class FillerAnalyzedEvent {
     private int totalFillers;
     private Map<String, Integer> fillersByType;
     private int wordCount;
+    private int wordsPerMinute;
+    private double silenceRatio;
+    private double volumeRmsAvg;
     private int durationSeconds;
 
     public FillerAnalyzedEvent() {}
 
     public FillerAnalyzedEvent(String sessionId, String userId, int totalFillers,
                                 Map<String, Integer> fillersByType,
-                                int wordCount, int durationSeconds, String traceId) {
+                                int wordCount, int wordsPerMinute,
+                                double silenceRatio, double volumeRmsAvg,
+                                int durationSeconds, String traceId) {
         this.eventId = UUID.randomUUID().toString();
         this.occurredAt = Instant.now();
         this.traceId = traceId;
@@ -30,6 +35,9 @@ public class FillerAnalyzedEvent {
         this.totalFillers = totalFillers;
         this.fillersByType = fillersByType;
         this.wordCount = wordCount;
+        this.wordsPerMinute = wordsPerMinute;
+        this.silenceRatio = silenceRatio;
+        this.volumeRmsAvg = volumeRmsAvg;
         this.durationSeconds = durationSeconds;
     }
 
@@ -53,6 +61,12 @@ public class FillerAnalyzedEvent {
     public void setFillersByType(Map<String, Integer> fillersByType) { this.fillersByType = fillersByType; }
     public int getWordCount() { return wordCount; }
     public void setWordCount(int wordCount) { this.wordCount = wordCount; }
+    public int getWordsPerMinute() { return wordsPerMinute; }
+    public void setWordsPerMinute(int wordsPerMinute) { this.wordsPerMinute = wordsPerMinute; }
+    public double getSilenceRatio() { return silenceRatio; }
+    public void setSilenceRatio(double silenceRatio) { this.silenceRatio = silenceRatio; }
+    public double getVolumeRmsAvg() { return volumeRmsAvg; }
+    public void setVolumeRmsAvg(double volumeRmsAvg) { this.volumeRmsAvg = volumeRmsAvg; }
     public int getDurationSeconds() { return durationSeconds; }
     public void setDurationSeconds(int durationSeconds) { this.durationSeconds = durationSeconds; }
 }
