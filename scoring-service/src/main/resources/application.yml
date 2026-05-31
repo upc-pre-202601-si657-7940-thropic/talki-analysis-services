@@ -19,7 +19,7 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${SERVER_PORT:8088}
+  port: ${PORT:8088}
 
 logging:
   level:

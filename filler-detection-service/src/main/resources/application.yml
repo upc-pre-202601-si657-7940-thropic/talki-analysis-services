@@ -12,7 +12,7 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${SERVER_PORT:8087}
+  port: ${PORT:8087}
 
 logging:
   level:
